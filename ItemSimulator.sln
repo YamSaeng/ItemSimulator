@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35222.181
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "ItemSimulator", "ItemSimulator\ItemSimulator.njsproj", "{3E8D455A-9FF0-438A-812B-9B3755902207}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3E8D455A-9FF0-438A-812B-9B3755902207}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E8D455A-9FF0-438A-812B-9B3755902207}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E8D455A-9FF0-438A-812B-9B3755902207}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E8D455A-9FF0-438A-812B-9B3755902207}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {61104340-FC22-4394-BBCE-0DF24313948D}
+	EndGlobalSection
+EndGlobal
