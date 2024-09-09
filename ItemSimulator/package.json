@@ -6,9 +6,17 @@
   "author": {
     "name": ""
   },
+  "type": "module",
   "devDependencies": {
-    "eslint": "^8.21.0"
-  },
-  "eslintConfig": {
+    "eslint": "^8.21.0",
+    "nodemon": "^3.1.4"
+  },  
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^5.19.1",
+    "cookie-parser": "^1.4.6",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "prisma": "^5.19.1"
   }
 }
