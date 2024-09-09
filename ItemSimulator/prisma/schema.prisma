@@ -12,3 +12,68 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model Users{
+	userId	Int	@id	@default(autoincrement()) @map("userId")
+	password	String	@map("password")
+
+	characters	Characters[]
+
+	@@map("Users")
+}
+
+model Items{
+	itemId Int @id @default(autoincrement()) @map("itemId")
+	characterInventoryId Int @map("characterInventoryId")
+	characterItemId	Int @map("characterItemId")
+	itemName String	@map("itemName")
+	itemPrice Int @map("itemPrice")	
+	itemStr	  Int @map("itemStr")
+	itemDex	  Int @map("itemDex")
+	itemInt	  Int @map("itemInt")
+	
+	characterInventory    CharacterInventory	@relation(fields: [characterInventoryId], references: [characterInventoryId])
+	characterItem    CharacterItem	@relation(fields: [characterItemId], references: [characterItemId])
+
+	@@map("Item")
+}
+
+model Characters{
+	characterId	Int	@id	@default(autoincrement()) @map("characterId")
+	userId	Int	@map("userId")
+	name	String @map("name")	
+	hp		Int @map("hp")
+	str		Int @map("str")
+	dex		Int @map("dex")
+	int		Int	@map("int")
+	money	Int @map("money")
+
+	user    Users	@relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+	characterInventory CharacterInventory?
+	characterItem	CharacterItem?
+
+	@@map("Character")
+}
+
+model CharacterInventory{
+	characterInventoryId Int @id @default(autoincrement()) @map("characterInventoryId")
+	characterId Int @unique @map("characterId")
+
+	characters Characters @relation(fields:[characterId], references: [characterId], onDelete: Cascade)
+
+	items	Items[]
+
+	@@map("CharacterInventory")
+}
+
+model CharacterItem{
+	characterItemId Int @id @default(autoincrement()) @map("characterItemId")
+	characterId Int @unique @map("characterId")
+
+	characters Characters @relation(fields:[characterId], references: [characterId], onDelete: Cascade)
+
+	items	Items[]
+
+	@@map("CharacterItem")
+}
