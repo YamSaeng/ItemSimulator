@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import { prisma } from '../utils/prisma/prismaClient.js'
 import { ValidateToken } from '../routes/users.router.js'
+import authMiddleware from '../../middlewares/auth.middleware.js'
 import dotenv from "dotenv";
 
 const router = express.Router();
@@ -12,31 +13,20 @@ dotenv.config();
 const accessTokenSecretKey = process.env.ACCESS_TOKEN_SECRET_KEY;
 const refreshTokenSecretKey = process.env.REFRESH_TOKEN_SECRET_KEY;
 
-router.post('/character-create', async (req, res, next) => {
-    const { characterName } = req.body;
-
-    const c2sAccessToken = req.cookies.accessToken;    
-
-    if (c2sAccessToken == undefined) {
-        return res.status(404).send('not found');
-    }
-
-    const payLoadAccess = ValidateToken(c2sAccessToken, accessTokenSecretKey);
-    if (!payLoadAccess) {        
-        return res.status(401).json({ message: '¼¼¼ÇÀÌ ¸¸·áµÇ¾ú½À´Ï´Ù. ·Î±×ÀÎÀ» ´Ù½Ã ÇÏ¼¼¿ä.' });
-    }
+router.post('/character-create', authMiddleware, async (req, res, next) => {
+    const { characterName } = req.body;       
 
     const isExistCharacter = await prisma.characters.findFirst({
         where: { characterName: characterName }
     });
 
     if (isExistCharacter) {
-        return res.status(401).json({ message: `${characterName}Àº ÀÌ¹Ì Á¸ÀçÇÏ´Â Ä³¸¯ÅÍ ÀÌ¸§ÀÔ´Ï´Ù.` })
+        return res.status(401).json({ message: `${characterName}ì€ ì´ë¯¸ ì¡´ì¬í•˜ëŠ” ìºë¦­í„° ì´ë¦„ì…ë‹ˆë‹¤.` })
     }
 
     const dbNewCharacter = await prisma.characters.create({
         data: {
-            userId: payLoadAccess.id, // ¿äÃ»ÇÑ id¸¦ ¹ÙÅÁÀ¸·Î Ä³¸¯ÅÍ¸¦ »ı¼ºÇØÁÜ
+            userId: req.user.id, // ìš”ì²­í•œ idë¥¼ ë°”íƒ•ìœ¼ë¡œ ìºë¦­í„°ë¥¼ ìƒì„±í•´ì¤Œ
             characterName: characterName,
             hp: 50,
             str: 4,
@@ -48,7 +38,7 @@ router.post('/character-create', async (req, res, next) => {
 
     return res
         .status(200)
-        .json({ message: `${characterName} Ä³¸¯ÅÍ¸¦ ¸¸µé¾ú½À´Ï´Ù.` });
+        .json({ message: `${characterName} ìºë¦­í„°ë¥¼ ë§Œë“¤ì—ˆìŠµë‹ˆë‹¤.` });
 });
 
 export default router;
