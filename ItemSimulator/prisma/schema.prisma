@@ -24,23 +24,6 @@ model Users{
 	@@map("Users")
 }
 
-model Items{
-	itemId Int @id @default(autoincrement()) @map("itemId")
-	itemCode Int @unique @map("itemCode")
-	characterInventoryId Int @map("characterInventoryId")
-	characterItemId	Int @map("characterItemId")
-	itemName String	@map("itemName")
-	itemPrice Int @map("itemPrice")	
-	itemStr	  Int @map("itemStr")
-	itemDex	  Int @map("itemDex")
-	itemInt	  Int @map("itemInt")
-	
-	characterInventory    CharacterInventory	@relation(fields: [characterInventoryId], references: [characterInventoryId])
-	characterItem    CharacterItem	@relation(fields: [characterItemId], references: [characterItemId])
-
-	@@map("Item")
-}
-
 model Characters{
 	characterId	Int	@id	@default(autoincrement()) @map("characterId")
 	userId String @map("userId")
@@ -52,33 +35,55 @@ model Characters{
 	money	Int @map("money")
 
 	user    Users	@relation(fields: [userId], references: [id], onDelete: Cascade)
+	
+	inventory Inventory?
+	equipment Equipment?
 
-	characterInventory CharacterInventory?
-	characterItem	CharacterItem?
-
-	@@map("Character")
+	@@map("Characters")
 }
 
-model CharacterInventory{
-	characterInventoryId Int @id @default(autoincrement()) @map("characterInventoryId")
-	characterId Int @unique @map("characterId")
+model Items{
+	itemId Int @id @default(autoincrement()) @map("itemId")
+	itemCode Int @unique @map("itemCode")
+	itemName String	@map("itemName")
+	itemPrice Int @map("itemPrice")	
+	itemStr	  Int @map("itemStr")
+	itemDex	  Int @map("itemDex")
+	itemInt	  Int @map("itemInt")	
 
-	characters Characters @relation(fields:[characterId], references: [characterId], onDelete: Cascade)
-
-	items	Items[]
-
-	@@map("CharacterInventory")
+	@@map("Items")
 }
 
-model CharacterItem{
-	characterItemId Int @id @default(autoincrement()) @map("characterItemId")
+model Inventory{
+	inventoryId Int @id @default(autoincrement()) @map("inventoryId")
 	characterId Int @unique @map("characterId")
 
-	characters Characters @relation(fields:[characterId], references: [characterId], onDelete: Cascade)
+	characters Characters @relation(fields: [characterId], references: [characterId], onDelete: Cascade)
 
-	items	Items[]
+	inventoryItem InventoryItem[]
 
-	@@map("CharacterItem")
+	@@map("Inventory")
+}
+
+model InventoryItem{
+	inventoryItemId Int @id @default(autoincrement()) @map("inventoryItemId")
+	inventoryId Int @map("inventoryId")
+	itemId Int @map("itemId")
+
+	inventory Inventory @relation(fields: [inventoryId], references: [inventoryId], onDelete: Cascade)
+
+	@@map("InventoryItem")
+}
+
+model Equipment{
+	equipmentId Int @id @default(autoincrement()) @map("equipmentId")
+	characterId Int @unique @map("characterId")
+	headPartItemCode Int? @map("headPartItemCode") 
+	weaponPartItemCode Int? @map("weaponPartItemCode")
+
+	characters Characters @relation(fields: [characterId], references: [characterId], onDelete: Cascade)
+
+	@@map("Equipment")
 }
 
 model RefreshTokens{
