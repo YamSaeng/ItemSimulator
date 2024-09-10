@@ -79,13 +79,66 @@ router.post('/item-edit/:itemCode', async (req, res, next) => {
             itemCode: +itemCode
         },
         data: {
-            ...editData           
+            ...editData
         }
     });
 
     return res
         .status(200)
         .json({ message: `${itemCode} 아이템 수정 성공` });
+});
+
+// 아이템 전체 조회
+router.get('/item', async (req, res, next) => {
+    // itemCode를 기준값으로 해서 오름차순으로 정렬해 데이터를 가져옴
+    const allItems = await prisma.items.findMany({
+        select: {
+            itemCode: true,
+            itemName: true,
+            itemPrice: true,
+            itemStr: true,
+            itemDex: true,
+            itemInt: true
+        },
+        orderBy: {
+            itemCode: 'asc'
+        }
+    });
+
+    // 조회한 전체 아이템 반환
+    return res.status(200).json({ allItems });
+});
+
+// 특정 아이템 조회
+router.get('/item/:itemCode', async (req, res, next) => {
+    const { itemCode } = req.params;
+
+    // itemCode로 item 테이블에서 아이템 찾음
+    const item = await prisma.items.findFirst({
+        where: {
+            itemCode : +itemCode
+        },
+        select: {
+            itemCode: true,
+            itemName: true,
+            itemPrice: true,
+            itemStr:true,
+            itemDex: true,
+            itemInt:true,
+        }
+    })
+
+    // 아이템을 찾지 못하면 에러 반환
+    if (!item) {
+        return res
+            .status(401)
+            .json({ message: '조회하고자 하는 아이템을 찾을 수 없습니다.' });
+    }
+
+    // 찾은 아이템 정보 반환
+    return res
+        .status(200)
+        .json({ item });
 });
 
 export default router;
