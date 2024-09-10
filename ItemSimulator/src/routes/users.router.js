@@ -1,9 +1,18 @@
 import express from 'express';
+import jwt from 'jsonwebtoken';
+import cookieParser from 'cookie-parser';
 import { prisma } from '../utils/prisma/prismaClient.js'
 import bcrypt from 'bcrypt';
+import dotenv from "dotenv";
 
 const router = express.Router();
 
+dotenv.config();
+
+const accessTokenSecretKey = process.env.ACCESS_TOKEN_SECRET_KEY;
+const refreshTokenSecretKey = process.env.REFRESH_TOKEN_SECRET_KEY;
+
+// 회원가입
 router.post('/sign-up', async (req, res, next) => {
     const { id, password, confirmPassword } = req.body;
     const isExistUser = await prisma.users.findFirst({
@@ -43,6 +52,140 @@ router.post('/sign-up', async (req, res, next) => {
     });
 
     return res.status(201).json({ message: `${id}로 회원가입이 완료되었습니다.` });
+});
+
+function createAccessToken(id) {
+    const accessToken = jwt.sign(
+        { id: id },
+        accessTokenSecretKey,
+        { expiresIn: '10s' }
+    );
+
+    return accessToken;
+}
+
+function createRefreshToken(id) {
+    const refreshToken = jwt.sign(
+        { id: id },
+        refreshTokenSecretKey,
+        { expiresIn: '7d' },
+    );
+
+    return refreshToken;
+}
+
+function ValidateToken(token, secretKey) {
+    try {
+        const payload = jwt.verify(token, secretKey);
+        return payload;
+    }
+    catch (error) {
+        return null;
+    }
+}
+
+// 로그인
+router.post('/sign-in', async (req, res, next) => {
+    const { id, password } = req.body;
+    const user = await prisma.users.findFirst({
+        where: { id }
+    });
+
+    if (!user) {
+        return res.status(401).json({ message: `${id}은 존재하지 않는 아이디 입니다.` });
+    }
+    else if (!(await bcrypt.compare(password, user.password))) {
+        return res.status(401).json({ message: `비밀번호가 일치하지 않습니다.` });
+    }
+
+    const c2sAccessToken = req.cookies.accessToken;
+    let s2cAccessToken = 0;
+    let s2cRefreshToken = 0;
+
+    let newAccessToken = false;
+
+    if (!c2sAccessToken) // 액세스 토큰이 없음
+    {
+        // 액세스 토큰 새 발행
+        newAccessToken = true;
+    }
+    else // 액세스 토큰이 있음
+    {        
+        // 액세스 토큰 유효한지 확인
+        // 유효하면 로그인 성공
+        const payload = ValidateToken(c2sAccessToken, accessTokenSecretKey);
+        if (!payload) // 액세스 토큰이 유효하지 않음
+        {
+            // 액세스 토큰 새 발행
+            newAccessToken = true;
+        }
+    }
+
+    // 액세스 토큰 새로 발급
+    if (newAccessToken) {
+        // DB에서 리프레시 토큰을 읽어옴
+        const dbRefreshToken = await prisma.refreshTokens.findFirst({
+            where: { userId: id },
+            select: {
+                token: true
+            }
+        });
+
+        // DB에 리프레시 토큰이 없음
+        if (dbRefreshToken == null)
+        {
+            // 액세스 토큰과 리프레시 토큰을 새로 발급
+            s2cAccessToken = createAccessToken(id);
+            s2cRefreshToken = createRefreshToken(id);
+
+            // 리프레시 토큰을 DB에 저장
+            const newDBRefreshToken = await prisma.refreshTokens.create({
+                data: {
+                    userId: id,
+                    token: s2cRefreshToken
+                }
+            });   
+
+            // 쿠키 전달
+            res.cookie('accessToken', s2cAccessToken);
+            res.cookie('refreshToken', s2cRefreshToken);
+        }
+        else // DB에 리프레시 토큰이 있음
+        {
+            // 리프레시 토큰이 유효한지 확인
+            const dbRefreshTokenCheck = ValidateToken(dbRefreshToken.token, refreshTokenSecretKey);
+            if (dbRefreshTokenCheck) // 리프레티 토큰이 유효함
+            {
+                // 액세스 토큰 발급
+                s2cAccessToken = createAccessToken(id);                
+
+                // 액세스 토큰 전달
+                res.cookie('accessToken', s2cAccessToken);
+            }
+            else // 리프레티 토큰이 유효하지 않음
+            {
+                // 액세스 토큰과 리프레시 토큰을 새로 발급
+                s2cAccessToken = createAccessToken(id);
+                s2cRefreshToken = createRefreshToken(id);
+
+                // 리프레시 토큰을 DB에 업데이트
+                const newDBRefreshToken = await prisma.refreshTokens.update({
+                    where: { userId: id },
+                    data: {                        
+                        token: s2cRefreshToken
+                    }
+                }); 
+
+                // 쿠키 전달
+                res.cookie('accessToken', s2cAccessToken);
+                res.cookie('refreshToken', s2cRefreshToken);
+            }
+        }
+    }
+
+    return res
+        .status(200)
+        .json({ message: `로그인 성공` });
 });
 
 export default router;
