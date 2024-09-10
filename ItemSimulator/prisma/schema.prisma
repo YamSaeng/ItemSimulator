@@ -26,6 +26,7 @@ model Users{
 
 model Items{
 	itemId Int @id @default(autoincrement()) @map("itemId")
+	itemCode Int @unique @map("itemCode")
 	characterInventoryId Int @map("characterInventoryId")
 	characterItemId	Int @map("characterItemId")
 	itemName String	@map("itemName")
