@@ -54,17 +54,17 @@ router.post('/sign-up', async (req, res, next) => {
     return res.status(201).json({ message: `${id}로 회원가입이 완료되었습니다.` });
 });
 
-function createAccessToken(id) {
+function CreateAccessToken(id) {
     const accessToken = jwt.sign(
         { id: id },
         accessTokenSecretKey,
-        { expiresIn: '10s' }
+        { expiresIn: '600s' }
     );
 
     return accessToken;
 }
 
-function createRefreshToken(id) {
+function CreateRefreshToken(id) {
     const refreshToken = jwt.sign(
         { id: id },
         refreshTokenSecretKey,
@@ -74,7 +74,7 @@ function createRefreshToken(id) {
     return refreshToken;
 }
 
-function ValidateToken(token, secretKey) {
+export function ValidateToken(token, secretKey) {
     try {
         const payload = jwt.verify(token, secretKey);
         return payload;
@@ -135,8 +135,8 @@ router.post('/sign-in', async (req, res, next) => {
         if (dbRefreshToken == null)
         {
             // 액세스 토큰과 리프레시 토큰을 새로 발급
-            s2cAccessToken = createAccessToken(id);
-            s2cRefreshToken = createRefreshToken(id);
+            s2cAccessToken = CreateAccessToken(id);
+            s2cRefreshToken = CreateRefreshToken(id);
 
             // 리프레시 토큰을 DB에 저장
             const newDBRefreshToken = await prisma.refreshTokens.create({
@@ -157,7 +157,7 @@ router.post('/sign-in', async (req, res, next) => {
             if (dbRefreshTokenCheck) // 리프레티 토큰이 유효함
             {
                 // 액세스 토큰 발급
-                s2cAccessToken = createAccessToken(id);                
+                s2cAccessToken = CreateAccessToken(id);                
 
                 // 액세스 토큰 전달
                 res.cookie('accessToken', s2cAccessToken);
@@ -165,8 +165,8 @@ router.post('/sign-in', async (req, res, next) => {
             else // 리프레티 토큰이 유효하지 않음
             {
                 // 액세스 토큰과 리프레시 토큰을 새로 발급
-                s2cAccessToken = createAccessToken(id);
-                s2cRefreshToken = createRefreshToken(id);
+                s2cAccessToken = CreateAccessToken(id);
+                s2cRefreshToken = CreateRefreshToken(id);
 
                 // 리프레시 토큰을 DB에 업데이트
                 const newDBRefreshToken = await prisma.refreshTokens.update({
