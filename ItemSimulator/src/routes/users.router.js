@@ -117,12 +117,21 @@ router.post('/sign-in', async (req, res, next) => {
             return res.status(404).send('not found');
         }
 
-        const payload = ValidateToken(token, process.env.ACCESS_TOKEN_SECRET_KEY);
-        if (!payload) // 액세스 토큰이 유효하지 않음
+        // 다른 유저의 AccessToken을 가지고 왔을 경우
+        const myToken = CreateAccessToken(id);
+        if (myToken !== c2sAccessToken)
         {
-            // 액세스 토큰 새 발행
             newAccessToken = true;
         }
+        else
+        {
+            const payload = ValidateToken(token, process.env.ACCESS_TOKEN_SECRET_KEY);
+            if (!payload) // 액세스 토큰이 유효하지 않음
+            {
+                // 액세스 토큰 새 발행
+                newAccessToken = true;
+            }
+        }        
     }
 
     // 액세스 토큰 새로 발급
