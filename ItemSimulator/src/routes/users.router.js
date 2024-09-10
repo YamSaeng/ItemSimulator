@@ -9,9 +9,6 @@ const router = express.Router();
 
 dotenv.config();
 
-const accessTokenSecretKey = process.env.ACCESS_TOKEN_SECRET_KEY;
-const refreshTokenSecretKey = process.env.REFRESH_TOKEN_SECRET_KEY;
-
 // 회원가입
 router.post('/sign-up', async (req, res, next) => {
     const { id, password, confirmPassword } = req.body;
@@ -57,21 +54,21 @@ router.post('/sign-up', async (req, res, next) => {
 function CreateAccessToken(id) {
     const accessToken = jwt.sign(
         { id: id },
-        accessTokenSecretKey,
+        process.env.ACCESS_TOKEN_SECRET_KEY,
         { expiresIn: '600s' }
     );
 
-    return accessToken;
+    return process.env.TOKEN_TYPE + accessToken;
 }
 
 function CreateRefreshToken(id) {
     const refreshToken = jwt.sign(
         { id: id },
-        refreshTokenSecretKey,
+        process.env.REFRESH_TOKEN_SECRET_KEY,
         { expiresIn: '7d' },
     );
 
-    return refreshToken;
+    return process.env.TOKEN_TYPE + refreshToken;
 }
 
 export function ValidateToken(token, secretKey) {
@@ -98,7 +95,8 @@ router.post('/sign-in', async (req, res, next) => {
         return res.status(401).json({ message: `비밀번호가 일치하지 않습니다.` });
     }
 
-    const c2sAccessToken = req.cookies.accessToken;
+    const c2sAccessToken = req.cookies.accessToken;    
+
     let s2cAccessToken = 0;
     let s2cRefreshToken = 0;
 
@@ -113,7 +111,13 @@ router.post('/sign-in', async (req, res, next) => {
     {        
         // 액세스 토큰 유효한지 확인
         // 유효하면 로그인 성공
-        const payload = ValidateToken(c2sAccessToken, accessTokenSecretKey);
+        const [tokenType, token] = c2sAccessToken.split(' ');
+
+        if (tokenType !== process.env.TOKEN_TYPE_CHECK) {
+            return res.status(404).send('not found');
+        }
+
+        const payload = ValidateToken(token, process.env.ACCESS_TOKEN_SECRET_KEY);
         if (!payload) // 액세스 토큰이 유효하지 않음
         {
             // 액세스 토큰 새 발행
@@ -129,7 +133,7 @@ router.post('/sign-in', async (req, res, next) => {
             select: {
                 token: true
             }
-        });
+        });        
 
         // DB에 리프레시 토큰이 없음
         if (dbRefreshToken == null)
@@ -152,8 +156,10 @@ router.post('/sign-in', async (req, res, next) => {
         }
         else // DB에 리프레시 토큰이 있음
         {
+            const [tokenType, token] = dbRefreshToken.token.split(' ');
+
             // 리프레시 토큰이 유효한지 확인
-            const dbRefreshTokenCheck = ValidateToken(dbRefreshToken.token, refreshTokenSecretKey);
+            const dbRefreshTokenCheck = ValidateToken(token, process.env.REFRESH_TOKEN_SECRET_KEY);
             if (dbRefreshTokenCheck) // 리프레티 토큰이 유효함
             {
                 // 액세스 토큰 발급
