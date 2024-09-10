@@ -41,4 +41,40 @@ router.post('/character-create', authMiddleware, async (req, res, next) => {
         .json({ message: `${characterName} 캐릭터를 만들었습니다.` });
 });
 
+router.delete('/character-delete/:characterId', authMiddleware, async (req, res, next) => {
+    const { characterId } = req.params;
+
+    const deleteCharacter = await prisma.characters.findFirst({
+        where: {
+            characterId: +characterId
+        }
+    });
+
+    if (!deleteCharacter) {
+        return res
+            .status(401)
+            .json({ message: `삭제할 캐릭터가 서버에 존재하지 않습니다.` });
+    }
+
+    // 삭제할 캐릭터의 userId와 요청한 유저의 userId가 다르면 삭제시키지 않는다.
+    if (deleteCharacter.userId !== req.user.id) {
+        return res
+            .status(401)
+            .json({ message: `${deleteCharacter.characterName}은 내 계정의 캐릭터가 아닙니다.` });
+    }    
+
+    const deleteCharacterName = deleteCharacter.characterName;
+
+    await prisma.characters.delete({
+        where: {
+            characterId: +characterId
+        }
+    });    
+
+    
+    return res
+        .status(200)
+        .json({ message: `${deleteCharacterName} 캐릭터가 삭제되었습니다.` });
+});
+
 export default router;
