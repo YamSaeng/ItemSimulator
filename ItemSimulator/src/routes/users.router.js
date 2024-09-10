@@ -200,7 +200,7 @@ router.post('/sign-in', async (req, res, next) => {
 
     return res
         .status(200)
-        .json({ message: `로그인 성공` });
+        .json({ message: `${id}로 로그인 성공` });
 });
 
 export default router;
