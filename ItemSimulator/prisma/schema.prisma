@@ -42,15 +42,15 @@ model Items{
 
 model Characters{
 	characterId	Int	@id	@default(autoincrement()) @map("characterId")
-	userId	Int	@map("userId")
-	name	String @map("name")	
+	userId String @unique @map("userId")
+	characterName String @map("characterName")	
 	hp		Int @map("hp")
 	str		Int @map("str")
 	dex		Int @map("dex")
 	int		Int	@map("int")
 	money	Int @map("money")
 
-	user    Users	@relation(fields: [userId], references: [userId], onDelete: Cascade)
+	user    Users	@relation(fields: [userId], references: [id], onDelete: Cascade)
 
 	characterInventory CharacterInventory?
 	characterItem	CharacterItem?
