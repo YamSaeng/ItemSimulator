@@ -9,6 +9,36 @@ const router = express.Router();
 
 dotenv.config();
 
+function CreateAccessToken(id) {
+    const accessToken = jwt.sign(
+        { id: id },
+        process.env.ACCESS_TOKEN_SECRET_KEY,
+        { expiresIn: '600s' }
+    );
+
+    return process.env.TOKEN_TYPE + accessToken;
+}
+
+function CreateRefreshToken(id) {
+    const refreshToken = jwt.sign(
+        { id: id },
+        process.env.REFRESH_TOKEN_SECRET_KEY,
+        { expiresIn: '7d' },
+    );
+
+    return process.env.TOKEN_TYPE + refreshToken;
+}
+
+export function ValidateToken(token, secretKey) {
+    try {
+        const payload = jwt.verify(token, secretKey);
+        return payload;
+    }
+    catch (error) {
+        return null;
+    }
+}
+
 // 회원가입
 router.post('/sign-up', async (req, res, next) => {
     const { id, password, confirmPassword } = req.body;
@@ -59,36 +89,6 @@ router.post('/sign-up', async (req, res, next) => {
         .status(201)
         .json({ message: `${id}로 회원가입이 완료되었습니다.` });
 });
-
-function CreateAccessToken(id) {
-    const accessToken = jwt.sign(
-        { id: id },
-        process.env.ACCESS_TOKEN_SECRET_KEY,
-        { expiresIn: '600s' }
-    );
-
-    return process.env.TOKEN_TYPE + accessToken;
-}
-
-function CreateRefreshToken(id) {
-    const refreshToken = jwt.sign(
-        { id: id },
-        process.env.REFRESH_TOKEN_SECRET_KEY,
-        { expiresIn: '7d' },
-    );
-
-    return process.env.TOKEN_TYPE + refreshToken;
-}
-
-export function ValidateToken(token, secretKey) {
-    try {
-        const payload = jwt.verify(token, secretKey);
-        return payload;
-    }
-    catch (error) {
-        return null;
-    }
-}
 
 // 로그인
 router.post('/sign-in', async (req, res, next) => {
