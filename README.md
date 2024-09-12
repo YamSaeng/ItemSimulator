@@ -100,3 +100,27 @@
 
   	"itemCode": 1,
  	"count": 1
+
+------------------------------------------------------------------
+인벤토리 아이템 조회 GET ItemSimulator/inventory/:searchInventoryCharacterCode
+
+- 인벤토리 아이템을 조회하고자 하는 캐릭터의 코드를 params로 받음
+
+예시) ItemSimulator/inventory/1
+
+
+	"itemId": 1,
+	"inventoryItemCount": 20
+	
+	"itemId": 2,
+	"inventoryItemCount": 5
+		
+	"itemId": 3,
+	"inventoryItemCount": 10
+		
+	"itemId": 4,
+	"inventoryItemCount": 1
+		
+	"itemId": 5,
+	"inventoryItemCount": 2
+		
