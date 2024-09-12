@@ -205,7 +205,8 @@ router.post('/item/buyItem/:itemBuyCharacterCode', authMiddleware, async (req, r
         // 인벤토리에 이미 해당 아이템을 가지고 있는지 확인한다.
         const inventoryItem = await prisma.inventoryItem.findFirst({
             where: {
-                itemId: searchItem.itemId
+                itemId: searchItem.itemId,
+                inventoryId: chracterInventory.inventoryId
             }
         });
 
