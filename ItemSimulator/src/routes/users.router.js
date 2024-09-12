@@ -175,8 +175,7 @@ router.post('/sign-in', async (req, res, next) => {
             });   
 
             // 쿠키 전달
-            res.cookie('accessToken', s2cAccessToken);
-            res.cookie('refreshToken', s2cRefreshToken);
+            res.cookie('accessToken', s2cAccessToken);            
         }
         else 
         {
@@ -214,8 +213,7 @@ router.post('/sign-in', async (req, res, next) => {
                 }); 
 
                 // 쿠키 전달
-                res.cookie('accessToken', s2cAccessToken);
-                res.cookie('refreshToken', s2cRefreshToken);
+                res.cookie('accessToken', s2cAccessToken);                
             }
         }
     }
