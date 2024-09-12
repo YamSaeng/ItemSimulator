@@ -35,6 +35,7 @@
     <Content Include="prisma\schema.prisma" />
     <Content Include="README.md" />
     <Content Include="src\routes\characters.router.js" />
+    <Content Include="src\routes\inventory.router.js" />
     <Content Include="src\routes\items.router.js" />
     <Content Include="src\routes\users.router.js" />
     <Content Include="src\utils\prisma\prismaClient.js" />
