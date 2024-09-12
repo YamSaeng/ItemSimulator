@@ -11,7 +11,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>3e8d455a-9ff0-438a-812b-9b3755902207</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>app.js</StartupFile>
+    <StartupFile>src\app.js</StartupFile>
     <StartWebBrowser>False</StartWebBrowser>
     <SearchPath>
     </SearchPath>
@@ -28,9 +28,25 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="app.js" />
+    <Content Include=".env" />
+    <Content Include="middlewares\auth.middleware.js" />
+    <Content Include="src\app.js" />
     <Content Include="package.json" />
+    <Content Include="prisma\schema.prisma" />
     <Content Include="README.md" />
+    <Content Include="src\routes\characters.router.js" />
+    <Content Include="src\routes\items.router.js" />
+    <Content Include="src\routes\users.router.js" />
+    <Content Include="src\utils\prisma\prismaClient.js" />
+    <Content Include="yarn.lock" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="middlewares\" />
+    <Folder Include="src\" />
+    <Folder Include="prisma\" />
+    <Folder Include="src\utils\" />
+    <Folder Include="src\routes\" />
+    <Folder Include="src\utils\prisma\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsToolsV2.targets" />
 </Project>
