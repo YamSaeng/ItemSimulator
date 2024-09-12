@@ -79,7 +79,7 @@
    
 예시) ItemSimulator/ItemSimulator/item/1
 
-------------------------------------------------------
+----------------------------------------------------------------
 아이템 구입 POST ItemSimulator/item/buyItem/:itemBuyCharacterCode
 
 -  아이템 구입하고자 하는 캐릭터의 코드를 params로 받음
@@ -90,3 +90,13 @@
   	"itemCode": 1,
  	"count": 1
 
+------------------------------------------------------------------
+아이템 판매 POST ItemSimulator/item/sellItem/:itemSellCharacterCode
+
+-  아이템 판매하고자 하는 캐릭터의 코드를 params로 받음
+-  판매하고자 하는 아이템의 코드와 개수를 Json으로 입력받음
+  
+예시) ItemSimulator/ItemSimulator/item/sellItem/1
+
+  	"itemCode": 1,
+ 	"count": 1
