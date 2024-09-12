@@ -36,7 +36,7 @@ router.post('/item-create', async (req, res, next) => {
 
     return res
         .status(200)
-        .json({ message: `${itemName} 아이템을 만들었습니다.` });
+        .json({ message: `${itemName} 아이템을 만들었습니다. itemCode [${dbNewItem.itemCode}]` });
 });
 
 // 아이템 수정
@@ -177,7 +177,7 @@ router.post('/item/buyItem/:itemBuyCharacterCode', authMiddleware, async (req, r
     if (!searchItem) {
         return res
             .status(401)
-            .json({ message: `구매하려는 아이템 코드 ${itemCode}를 찾을 수 없습니다.` });
+            .json({ message: `구매하려는 아이템을 찾을 수 없습니다.` });
     }
 
     // 구입하려는 아이템의 총 비용 계산
@@ -213,9 +213,9 @@ router.post('/item/buyItem/:itemBuyCharacterCode', authMiddleware, async (req, r
         if (inventoryItem) {
             await prisma.inventoryItem.update({
                 where: {
-                    inventoryItemIndex: inventoryItem.inventoryItemIndex
+                    inventoryItemId: inventoryItem.inventoryItemId                    
                 },
-                data:{
+                data: {
                     inventoryItemCount: inventoryItem.inventoryItemCount + count
                 }
             });
@@ -224,19 +224,19 @@ router.post('/item/buyItem/:itemBuyCharacterCode', authMiddleware, async (req, r
             const emptyInventoryItem = await prisma.inventoryItem.findFirst({
                 where: {
                     inventoryId: chracterInventory.inventoryId,
-                    itemId : null
+                    itemId: 0
                 }
             });
 
             await prisma.inventoryItem.update({
                 where: {
-                    inventoryItemIndex: emptyInventoryItem.inventoryItemIndex
+                    inventoryItemId: emptyInventoryItem.inventoryItemId                    
                 },
                 data: {
                     itemId: searchItem.itemId,
                     inventoryItemCount: count
                 }
-            })
+            });
         }
 
         // 잔돈을 계산해 character의 momey를 업데이트 한다.
