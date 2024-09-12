@@ -53,7 +53,7 @@ router.post('/character-create', authMiddleware, async (req, res, next) => {
 
     return res
         .status(200)
-        .json({ message: `${characterName} 캐릭터를 만들었습니다.` });
+        .json({ message: `${characterName} 캐릭터를 만들었습니다. 캐릭번호 : [${dbNewCharacter.characterId}]` });
 });
 
 // 캐릭터 삭제
