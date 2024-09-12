@@ -69,9 +69,9 @@ model Inventory{
 model InventoryItem{
 	inventoryItemId Int @id @default(autoincrement()) @map("inventoryItemId")
 	inventoryId Int @map("inventoryId")
-	itemId Int? @map("itemId")
+	itemId Int @default(0) @map("itemId")
 	inventoryItemIndex Int @map("inventoryItemIndex")
-	inventoryItemCount Int? @map("inventoryItemCount")
+	inventoryItemCount Int @default(0) @map("inventoryItemCount")
 
 	inventory Inventory @relation(fields: [inventoryId], references: [inventoryId], onDelete: Cascade)
 
