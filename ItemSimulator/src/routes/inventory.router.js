@@ -20,6 +20,13 @@ router.get('/inventory/:searchInventoryCharacterCode', authMiddleware, async (re
         return res.status(401).json({ message: "조회하려는 캐릭터를 서버에서 찾을 수 없습니다." })
     }
 
+    // 조회할 캐릭터의 userId와 요청한 유저의 userId가 다르면 조회하지 않는다.
+    if (searchCharacter.userId !== req.user.id) {
+        return res
+            .status(401)
+            .json({ message: `유효한 접근이 아닙니다.` });
+    }
+
     // 인벤토리를 찾음
     const searchInventory = await prisma.inventory.findFirst({
         where: {
