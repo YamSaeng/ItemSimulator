@@ -253,8 +253,101 @@ router.post('/item/buyItem/:itemBuyCharacterCode', authMiddleware, async (req, r
 
         return res
             .status(200)
-            .json({ message: `아이템 구입 성공! 남은 돈 : ${moneyUpdateCharacter.money}` });
+            .json({ message: `${searchItem.itemName} 아이템 ${count}개 구입 성공! 남은 돈 : ${moneyUpdateCharacter.money}` });
     }
+});
+
+// 아이템 판매
+router.post('/item/sellItem/:itemSellCharacterCode', authMiddleware, async (req, res, next) => {
+    const { itemSellCharacterCode } = req.params;
+    const { itemCode, count } = req.body;
+
+    // 판매하고자 하는 유저의 캐릭터를 찾음
+    const searchCharacter = await prisma.characters.findFirst({
+        where: {
+            characterId: +itemSellCharacterCode
+        }
+    })
+
+    // 캐릭터가 DB에 없으면 에러 반환
+    if (!searchCharacter) {
+        return res.status(401).json({ message: "아이템을 판매하려는 캐릭터를 서버에서 찾을 수 없습니다." })
+    }
+
+    // 캐릭터가 로그인한 유저의 캐릭터 인지 확인
+    if (searchCharacter.userId !== req.user.id) {
+        return res.status(401).json({ message: `유효한 접근이 아닙니다.` })
+    }
+
+    // 아이템이 DB에 있는지 확인
+    const searchItem = await prisma.items.findFirst({
+        where: {
+            itemCode: +itemCode
+        }
+    });
+
+    // 구매하려는 아이템이 DB에 없으면 에러 반환
+    if (!searchItem) {
+        return res.status(401).json({ message: `판매하려는 아이템을 찾을 수 없습니다.` });
+    }
+
+    // 캐릭터의 인벤토리를 찾는다.
+    const findInventory = await prisma.inventory.findFirst({
+        where: {
+            characterId: searchCharacter.characterId
+        }
+    })
+
+    // 캐릭터의 인벤토리가 DB에 없으면 에러 반환
+    if (!findInventory) {
+        return res.status(401).json({ message: `[itemSesll] 인벤토리를 찾을 수 없습니다.` });
+    }
+
+    // 인벤토리에서 팔려고 하는 아이템을 찾음
+    const findInventoryItem = await prisma.inventoryItem.findFirst({
+        where: {
+            inventoryId: findInventory.inventoryId,
+            itemId: searchItem.itemId
+        }
+    })
+
+    // 인벤토리에 판매하려는 아이템이 없으면 에러 반환
+    if (!findInventoryItem) {
+        return res.status(401).json({ message: `판매하려는 아이템이 인벤토리에 없습니다.` });
+    }
+
+    // 인벤토리에 있는 아이템 보다 많은 개수를 팔려고 하면 에러 반환
+    if (findInventoryItem.inventoryItemCount < count) {
+        return res.status(401).json({ message: `판매하려는 아이템이 너무 많습니다. 남은 개수 : ${findInventoryItem.inventoryItemCount} 개` });
+    }
+
+    // 개수 업데이트
+    const countUpdateSearchItem = await prisma.inventoryItem.update({
+        where: {
+            inventoryItemId: findInventoryItem.inventoryItemId
+        },
+        data: {
+            inventoryItemCount: findInventoryItem.inventoryItemCount - count
+        }
+    });
+
+    // 판매 비용 계산
+    const sellMoney = searchItem.itemPrice * count * 0.6;
+
+    const moneyUpdateCharacter = await prisma.characters.update({
+        where: {
+            characterId: searchCharacter.characterId
+        },
+        data: {
+            money: searchCharacter.money + sellMoney
+        }
+    });
+
+    return res
+        .status(200)
+        .json({
+            message: `${searchItem.itemName}을 [${sellMoney}] 에 팔았습니다. 보유 돈 : [${moneyUpdateCharacter.money}] ${countUpdateSearchItem.inventoryItemCount} 개 보유 중`
+        });
 });
 
 export default router;
